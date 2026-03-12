@@ -1,0 +1,25 @@
+name: Deploy Cinema Project
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: 13.62.98.112
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/src/py-fastapi-homework-5-ec2-deploy-task
+            git pull origin main
+            cp -n .env.sample .env || true
+            cp -n docker/nginx/.env.sample docker/nginx/.env || true
+            docker compose -f docker-compose-prod.yml up -d --build
